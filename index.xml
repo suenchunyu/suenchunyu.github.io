@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Suen ChunYu</title>
+    <link>https://suenchunyu.dev/</link>
+    <description>Recent content on Suen ChunYu</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>&amp;copy; Copyright 2021, Suen ChunYu</copyright><atom:link href="https://suenchunyu.dev/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>关于我</title>
+      <link>https://suenchunyu.dev/about/</link>
+      <pubDate>Fri, 22 Jan 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://suenchunyu.dev/about/</guid>
+      <description>A passionate Software Developer 🚀 from Henan, China. Now i working in Haidian, Beijing.
+来自中国河南省充满热情的软件研发工程师，目前我在北京海淀区某新能源科技公司就职工作。
+技术 (Tech)  Go Java  最近正在关注的 (Personal Stuffs)  MIT 6.824 JamesM&amp;rsquo;s kernel development tutorials  联系我的方式 (Contact Me)  邮件地址(Mail): c3Vuemhlbnl1Y25AZ21haWwuY29t 微信(WeChat): Z2F2aW5ieXpoZW55dQ==  </description>
+    </item>
+    
+  </channel>
+</rss>
