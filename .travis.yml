@@ -13,7 +13,7 @@ install:
     # Github may forbid request from travis container, so use tor proxy
     - sudo systemctl start tor
     # - curl -fsL --socks5-hostname 127.0.0.1:9050 https://api.github.com/repos/gohugoio/hugo/releases/latest | sed -r -n '/browser_download_url/{/Linux-64bit.deb/{s@[^:]*:[[:space:]]*"([^"]*)".*@\1@g;p;q}}' | xargs wget
-    - download_command='curl -fsSL -x socks5h://127.0.0.1:9050' # --socks5-hostname
+    - download_command='curl -fsSL' # --socks5-hostname
     - $download_command -O $($download_command https://api.github.com/repos/gohugoio/hugo/releases/latest | sed -r -n '/browser_download_url/{/Linux-64bit.deb/{s@[^:]*:[[:space:]]*"([^"]*)".*@\1@g;p;q}}')
     - sudo dpkg -i hugo*.deb
     - rm -rf public 2> /dev/null
