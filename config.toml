@@ -33,7 +33,7 @@ copyright = "&copy; Copyright 2021, Suen ChunYu"
 [params]
   description = "Your meta description"      # Your meta description of the site
   header_title = "Suen ChunYu"                 # Your header title
-  header_subtitle = "Life, Programming, Keep Passion." # Your header subtitle
+  header_subtitle = "Development Manager | Kyotta | Haidian, Beijing" # Your header subtitle
   home_image = "/images/avatar.jpg"          # Path to header image starting from the static directory
   recent_posts = 5                           # Max amount of recent posts to show
   mainSections = ["posts", "post", "blog"]   # Main sections to include in recent posts

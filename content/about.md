@@ -5,9 +5,9 @@ aliases = ["about-me", "contact"]
 author = "Suen ChunYu"
 +++
 
-A passionate Software Developer 🚀 from Henan, China. Now i working in Haidian, Beijing.
+A passionate Software Developer 🚀 from Henan, China. I work in Haidian, Beijing.
 
-来自中国河南省充满热情的软件研发工程师，目前我在北京海淀区某新能源科技公司就职工作。
+来自中国河南省充满热情的软件研发工程师，目前我在北京海淀区某新能源科技公司担任研发经理一职。
 
 ## 技术 (Tech)
 
