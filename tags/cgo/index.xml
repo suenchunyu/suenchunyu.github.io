@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Suen ChunYu</title>
-    <link>https://suenchunyu.dev/</link>
-    <description>Recent content on Suen ChunYu</description>
+    <title>cgo on Suen ChunYu</title>
+    <link>https://suenchunyu.dev/tags/cgo/</link>
+    <description>Recent content in cgo on Suen ChunYu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
     <copyright>&amp;copy; Copyright 2021, Suen ChunYu</copyright>
-    <lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://suenchunyu.dev/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://suenchunyu.dev/tags/cgo/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Plug-in System of Golang</title>
       <link>https://suenchunyu.dev/post/plug-in-system-of-golang/</link>
@@ -17,17 +17,6 @@
       <description>Go语言的开发者一般关注点更多的会放在其比较热门的特性上，例如：Goroutine、GPM和Channel等，但Go提供的远远不止这些，其中的插件机制和CGO相对来说都是比较少关注的Features，通过插件机制可以实现构建松散耦合的模块化程序。
  1. 设计原理 Go的插件机制基于的是C语言的动态库机制实现的，所以本身Go直接继承了C语言动态库的优缺点；在Linux中一般会碰静态链接库和动态库两种，它们各自的特点和优势大不相同，我们一般要结合实际场景酌情选择：
  静态库（静态链接库）：一般是由开发者自定的变量和函数构成，其构成简单，不像动态链接库那么复杂，在编译期间一般由编译器或者链接器将它们集成到目标程序内，并打包制作成可独立运作的可执行文件。 动态库（共享对象）：和Windows的动态链接库不同，在Unix或者Linux环境下是共享对象（共享库），预先编译链接好的可执行文件，程序在使用这些库时是从共享对象中加载，而不是在编译期间打包进程序。  由于特性的不同，动态库和静态库的优缺点也就非常明显；只依赖静态库并通过静态链接的二进制程序可以独立执行，但是由于编译后的结果包含了全部的依赖，这就导致编译后的结果比较大；而动态库往往是在多个可执行文件之间共享，加载动态库的过程也是在装载时（Load-Time）加载，大多数情况下同一时间多个应用可以使用一个库的同一份拷贝，系统并不需要加载这个库的多个实例，极大的降低了内存的占用。</description>
-    </item>
-    
-    <item>
-      <title>关于我</title>
-      <link>https://suenchunyu.dev/about/</link>
-      <pubDate>Fri, 22 Jan 2021 00:00:00 +0000</pubDate>
-      
-      <guid>https://suenchunyu.dev/about/</guid>
-      <description>A passionate Software Developer 🚀 from Henan, China. I work in Haidian, Beijing.
-来自中国河南省充满热情的软件研发工程师，目前我在北京海淀区某新能源科技公司担任研发经理一职。
-技术 (Tech)  Go Java  最近正在关注的 (Personal Stuffs)  MIT 6.824 JamesM&amp;rsquo;s kernel development tutorials  联系我的方式 (Contact Me)  邮件地址(Mail): c3Vuemhlbnl1Y25AZ21haWwuY29t 微信(WeChat): Z2F2aW5ieXpoZW55dQ==  </description>
     </item>
     
   </channel>
