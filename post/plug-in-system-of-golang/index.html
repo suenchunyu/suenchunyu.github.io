@@ -110,7 +110,78 @@
 <li><a href="https://zh.wikipedia.org/wiki/%E5%87%BD%E5%BC%8F%E5%BA%AB#%E5%8A%A8%E6%80%81%E5%BA%93">动态库（共享对象）</a>：和Windows的<a href="https://zh.wikipedia.org/wiki/Dynamic_Link_Library">动态链接库</a>不同，在Unix或者Linux环境下是共享对象（共享库），预先编译链接好的可执行文件，程序在使用这些库时是从共享对象中加载，而不是在编译期间打包进程序。</li>
 </ul>
 <p>由于特性的不同，动态库和静态库的优缺点也就非常明显；只依赖静态库并通过静态链接的二进制程序可以独立执行，但是由于编译后的结果包含了全部的依赖，这就导致编译后的结果比较大；而动态库往往是在多个可执行文件之间共享，加载动态库的过程也是在装载时（Load-Time）加载，大多数情况下同一时间多个应用可以使用一个库的同一份拷贝，系统并不需要加载这个库的多个实例，极大的降低了内存的占用。</p>
-<p><img src="https://suenchunyu.dev/static/libraries.png" alt="Libraries"></p>
+<p><img src="https://suenchunyu.dev/images/libraries.png#center" alt="Libraries"></p>
+<p>使用静态链接编译二进制文件在部署上有非常明显的优势，最终的编译结果也可以直接运行在大多数的机器上，静态链接带来的部署优势远比更低的内存占用显得重要，所以很多编程语言包括 Go 都将静态链接作为默认的链接方式。</p>
+<h2 id="2-插件机制">2. 插件机制</h2>
+<p>通过在主程序和共享库之间定义一系列的接口，我们可以通过Go提供的<code>plugin</code>库来加载其他人编译的共享库对象，这样做的好处是主程序和共享库的开发者不需要彼此共享代码，只要在双方约定的接口不变的前提下，修改了共享库之后也不需要重新编译一遍主程序：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Extension</span> <span style="color:#66d9ef">interface</span> {
+  <span style="color:#a6e22e">Name</span>() <span style="color:#66d9ef">string</span>
+}
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">plug</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">plugin</span>.<span style="color:#a6e22e">Open</span>(<span style="color:#e6db74">&#34;extension.so&#34;</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    panic(<span style="color:#a6e22e">err</span>)
+  } <span style="color:#66d9ef">else</span> {
+    <span style="color:#a6e22e">initSymbol</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">plug</span>.<span style="color:#a6e22e">Lookup</span>(<span style="color:#e6db74">&#34;Name&#34;</span>)
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+      panic(<span style="color:#a6e22e">err</span>)
+    }
+    <span style="color:#a6e22e">nameFunc</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">initSymbol</span>.(<span style="color:#66d9ef">func</span>() <span style="color:#a6e22e">Extension</span>)
+    <span style="color:#a6e22e">name</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">nameFunc</span>()
+    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">name</span>)
+  }
+}
+</code></pre></div><p>上述代码定义了<code>Extension</code>接口，并认为共享库中一定包含了<code>func Name() string</code>的函数，当我们通过<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin.go#L31"><code>plugin.Open</code></a>读取包含Go插件的共享库之后，获取文件中的<code>Name</code>符号并且将其转换为正确的函数类型，就可以通过此函数拿到它的名字了。</p>
+<h2 id="3-不同操作系统下的不同实现">3. 不同操作系统下的不同实现</h2>
+<p>不同的操作系统下对应都有不同的动态链接机制和共享库格式，Linux中的共享对象会使用<a href="https://zh.wikipedia.org/wiki/%E5%8F%AF%E5%9F%B7%E8%A1%8C%E8%88%87%E5%8F%AF%E9%8F%88%E6%8E%A5%E6%A0%BC%E5%BC%8F">ELF</a>格式并提供了一组操作动态链接器的接口：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">dlopen</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>filename, <span style="color:#66d9ef">int</span> flag);
+<span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">dlerror</span>(<span style="color:#66d9ef">void</span>);
+<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">dlsym</span>(<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>handle, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>symbol);
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">dlclose</span>(<span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>handle);
+</code></pre></div><p><code>dlopen</code>会根据传入的文件名加载对应的共享库并返回一个句柄（Handle）；<code>dlsym</code>函数可以在该句柄中搜索特定的符号，这个符号可以是函数也可以是变量，它会返回该符号被加载到内存中的地址；由于待查找的符号可能不存在于目标共享库中，所以每次查找后都需要调用<code>dlerror</code>查看当前查找的结果。</p>
+<h2 id="4-go之中的共享库">4. Go之中的共享库</h2>
+<p>Go语言的插件机制的全部实现都在<a href="https://pkg.go.dev/plugin">plugin</a>包中，这个包实现了Go插件的加载和符号解析。<br>
+由于Go插件是一个带有公开函数和变量的包，需要使用如下命令来将代码编译成Go插件：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-reStructuredText" data-lang="reStructuredText">go build -buildmode=plugin ...<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>该命令会生成一个共享对象<code>.so</code>文件，当该文件被加载到Go程序时会使用如下结构体<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin.go#L21"><code>plugin.Plugin</code></a>表示：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// Plugin is a loaded Go plugin.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Plugin</span> <span style="color:#66d9ef">struct</span> {
+	<span style="color:#a6e22e">pluginpath</span> <span style="color:#66d9ef">string</span>
+	<span style="color:#a6e22e">err</span>        <span style="color:#66d9ef">string</span>        <span style="color:#75715e">// set if plugin failed to load
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">loaded</span>     <span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">struct</span>{} <span style="color:#75715e">// closed when loaded
+</span><span style="color:#75715e"></span>	<span style="color:#a6e22e">syms</span>       <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">interface</span>{}
+}
+</code></pre></div><p>与插件机制相关的两个方法分别是用于加载Go插件的<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin.go#L31"><code>plugin.Open</code></a>和在插件中查找符号的<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin.go#L39"><code>plugin.Plugin.Lookup</code></a>。</p>
+<h2 id="5-插件机制之中的cgo">5. 插件机制之中的CGO</h2>
+<p>在Go的插件机制之中，使用到了CGO来完成对于动态链接器接口的操作，分别是<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin_dlopen.go#L18"><code>plugin.pluginOpen</code></a>和<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin_dlopen.go#L19"><code>plugin.pluginLookup</code></a>两个C的函数，这两个函数的实现非常简单，只是简单的对<code>dlopen</code>和<code>dlsym</code>做了简单的包装，<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin_dlopen.go#L18"><code>plugin.pluginOpen</code></a>简单包装了下标准库中的<code>dlopen</code>和<code>dlerror</code>函数并在共享库加载成功之后返回指向共享库的句柄：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">static</span> uintptr_t <span style="color:#a6e22e">pluginOpen</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> path, <span style="color:#66d9ef">char</span><span style="color:#f92672">**</span> err) {
+	<span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> h <span style="color:#f92672">=</span> dlopen(path, RTLD_NOW<span style="color:#f92672">|</span>RTLD_GLOBAL);
+	<span style="color:#66d9ef">if</span> (h <span style="color:#f92672">==</span> NULL) {
+		<span style="color:#f92672">*</span>err <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span>)dlerror();
+	}
+	<span style="color:#66d9ef">return</span> (uintptr_t)h;
+}
+</code></pre></div><p><a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin_dlopen.go#L19"><code>plugin.pluginLookup</code></a>使用了标准库中的<code>dlsym</code>和<code>dlerror</code>用来获取共享库句柄中的特定的符号：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> <span style="color:#a6e22e">pluginLookup</span>(uintptr_t h, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name, <span style="color:#66d9ef">char</span><span style="color:#f92672">**</span> err) {
+	<span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> r <span style="color:#f92672">=</span> dlsym((<span style="color:#66d9ef">void</span><span style="color:#f92672">*</span>)h, name);
+	<span style="color:#66d9ef">if</span> (r <span style="color:#f92672">==</span> NULL) {
+		<span style="color:#f92672">*</span>err <span style="color:#f92672">=</span> (<span style="color:#66d9ef">char</span><span style="color:#f92672">*</span>)dlerror();
+	}
+	<span style="color:#66d9ef">return</span> r;
+}
+</code></pre></div><p>这么包装的目的是让他们的函数签名看起来更像是Go中的函数签名，方便调用。</p>
+<h2 id="6-加载过程">6. 加载过程</h2>
+<p>用于加载共享库的函数<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin_dlopen.go#L18"><code>plugin.pluginOpen</code></a>会将共享库文件的路径作为参数并返回<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin.go#L21"><code>plugin.Plugin</code></a>结构：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">Open</span>(<span style="color:#a6e22e">path</span> <span style="color:#66d9ef">string</span>) (<span style="color:#f92672">*</span><span style="color:#a6e22e">Plugin</span>, <span style="color:#66d9ef">error</span>) {
+	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">open</span>(<span style="color:#a6e22e">path</span>)
+}
+</code></pre></div><p>这个函数会调用<code>plugin</code>包中的一个私有函数<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin_dlopen.go#L42"><code>plugin.open</code></a>加载插件，这个函数是插件加载过程的核心函数，大体分为如下几个步骤：</p>
+<ol>
+<li>准备C语言函数<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin_dlopen.go#L18"><code>plugin.pluginOpen</code></a>的参数；</li>
+<li>通过CGO机制调用<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin_dlopen.go#L18"><code>plugin.pluginOpen</code></a>并初始化加载的插件模块；</li>
+<li>查找加载模块中的<code>init</code>函数并调用此函数执行插件模块包的初始化过程；</li>
+<li>通过插件的文件名和符号列表构建<a href="https://github.com/golang/go/blob/41d8e61a6b9d8f9db912626eb2bbc535e929fefc/src/plugin/plugin.go#L21"><code>plugin.Plugin</code></a>结构。</li>
+</ol>
 
         </article>
     </div>
