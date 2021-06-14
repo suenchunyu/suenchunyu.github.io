@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Suen ChunYu</title>
-    <link>https://suenchunyu.dev/</link>
-    <description>Recent content on Suen ChunYu</description>
+    <title>Go on Suen ChunYu</title>
+    <link>https://suenchunyu.dev/categories/go/</link>
+    <description>Recent content in Go on Suen ChunYu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
     <copyright>&amp;copy; Copyright 2021, Suen ChunYu</copyright>
-    <lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://suenchunyu.dev/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://suenchunyu.dev/categories/go/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Plug-in System of Golang</title>
       <link>https://suenchunyu.dev/post/plug-in-system-of-golang/</link>
@@ -22,17 +22,6 @@
 type Extension interface { Name() string } func main() { if plug, err := plugin.Open(&amp;#34;extension.so&amp;#34;); err != nil { panic(err) } else { initSymbol, err := plug.Lookup(&amp;#34;Name&amp;#34;) if err != nil { panic(err) } nameFunc := initSymbol.(func() Extension) name := nameFunc() fmt.Println(name) } } 上述代码定义了Extension接口，并认为共享库中一定包含了func Name() string的函数，当我们通过plugin.Open读取包含Go插件的共享库之后，获取文件中的Name符号并且将其转换为正确的函数类型，就可以通过此函数拿到它的名字了。
 3. 不同操作系统下的不同实现 不同的操作系统下对应都有不同的动态链接机制和共享库格式，Linux中的共享对象会使用ELF格式并提供了一组操作动态链接器的接口：
 void *dlopen(const char *filename, int flag); char *dlerror(void); void *dlsym(void *handle, const char *symbol); int dlclose(void *handle); dlopen会根据传入的文件名加载对应的共享库并返回一个句柄（Handle）；dlsym函数可以在该句柄中搜索特定的符号，这个符号可以是函数也可以是变量，它会返回该符号被加载到内存中的地址；由于待查找的符号可能不存在于目标共享库中，所以每次查找后都需要调用dlerror查看当前查找的结果。</description>
-    </item>
-    
-    <item>
-      <title>关于我</title>
-      <link>https://suenchunyu.dev/about/</link>
-      <pubDate>Fri, 22 Jan 2021 00:00:00 +0000</pubDate>
-      
-      <guid>https://suenchunyu.dev/about/</guid>
-      <description>A passionate Software Developer 🚀 from Henan, China. I currently work in Haidian, Beijing.
-来自中国河南省充满热情的软件研发工程师，目前我在北京海淀区。
-技术 (Tech)  Go Java Python  最近正在关注的 (Personal Stuffs)  MIT 6.824 Writing an interceptor with Go, named Snow-Lang JamesM&amp;rsquo;s kernel development tutorials  联系我的方式 (Contact Me)  邮件地址(Email): c3Vuemhlbnl1Y25AZ21haWwuY29t 微信(WeChat): Z2F2aW5ieXpoZW55dQ==  </description>
     </item>
     
   </channel>

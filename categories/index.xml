@@ -6,6 +6,16 @@
     <description>Recent content in Categories on Suen ChunYu</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-cn</language>
-    <copyright>&amp;copy; Copyright 2021, Suen ChunYu</copyright><atom:link href="https://suenchunyu.dev/categories/index.xml" rel="self" type="application/rss+xml" />
+    <copyright>&amp;copy; Copyright 2021, Suen ChunYu</copyright>
+    <lastBuildDate>Mon, 01 Feb 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://suenchunyu.dev/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Go</title>
+      <link>https://suenchunyu.dev/categories/go/</link>
+      <pubDate>Mon, 01 Feb 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://suenchunyu.dev/categories/go/</guid>
+      <description></description>
+    </item>
+    
   </channel>
 </rss>
