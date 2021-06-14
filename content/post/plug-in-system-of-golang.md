@@ -7,6 +7,9 @@ tags = [
     "golang",
     "cgo",
 ]
+categories = [
+    "Go"
+]
 
 +++
 
